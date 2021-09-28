@@ -1,3 +1,4 @@
+import Select from 'rc-select';
 import { getRepository, Repository } from 'typeorm';
 
 import { User } from '../../../users/entities/User';
@@ -13,18 +14,28 @@ export class GamesRepository implements IGamesRepository {
   }
 
   async findByTitleContaining(param: string): Promise<Game[]> {
-    return this.repository
-      .createQueryBuilder()
-      // Complete usando query builder
+    const result = await this.repository
+      .createQueryBuilder('games').where('games.title ILIKE :title', { title: `%${param}%` }).getMany()
+    return result
+    // Complete usando query builder
   }
 
   async countAllGames(): Promise<[{ count: string }]> {
-    return this.repository.query(); // Complete usando raw query
+    const result = await this.repository.query(`select count(*) from games g`); // Complete usando raw query
+
+    return result
   }
 
   async findUsersByGameId(id: string): Promise<User[]> {
-    return this.repository
-      .createQueryBuilder()
-      // Complete usando query builder
+    // return await this.repository.createQueryBuilder('games')
+
+    const games = await this.repository.createQueryBuilder('games').innerJoinAndSelect('games.users', 'users').getMany()
+    const findUserById = games.filter(item => item.id === id)
+    const users = findUserById.map(i => i.users)
+    if (!findUserById) {
+      throw new Error('erro')
+    }
+    return users[0]
+    // Complete usando query builder
   }
 }
