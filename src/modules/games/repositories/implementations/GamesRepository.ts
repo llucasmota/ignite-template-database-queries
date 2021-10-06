@@ -1,4 +1,3 @@
-import Select from 'rc-select';
 import { getRepository, Repository } from 'typeorm';
 
 import { User } from '../../../users/entities/User';
